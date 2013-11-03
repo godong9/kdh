@@ -8,7 +8,7 @@ var mysql_conn = require('../sql/mysql_server').mysql_conn;
 exports.get_book_list = function(req, res){
 	var evt = new EventEmitter();
 	var dao_b = require('../sql/book_sql');
-	var result = {};
+	var result = { book:{} };
 
 	var school_idx = req.session.school_idx;
 
@@ -18,20 +18,21 @@ exports.get_book_list = function(req, res){
 
 	dao_b.dao_get_book_list(evt, mysql_conn, params);
 	evt.on('get_book_list', function(err, rows){
-		result = rows;
+		result.book = rows;
 		res.send(result);
 	});
 };
 
 /*
  * POST set_book
- * params : title, author, publisher, edition, condition, price, email, school_idx
+ * params : isbn, title, author, publisher, edition, condition, price, email, school_idx
  */
 exports.set_book = function(req, res){
 	var evt = new EventEmitter();
 	var dao_b = require('../sql/book_sql');
-	var result = {};
+	var result = { };
 
+	var isbn = req.body.isbn;
 	var title = req.body.title;
 	var author = req.body.author;
 	var publisher = req.body.publisher;
@@ -42,6 +43,7 @@ exports.set_book = function(req, res){
 	var school_idx = req.session.school_idx;
 
 	var params = { 
+		isbn: isbn,
 		title: title,
 		author: author,
 		publisher: publisher,
@@ -54,8 +56,8 @@ exports.set_book = function(req, res){
 
 	dao_b.dao_set_book(evt, mysql_conn, params);
 	evt.on('set_book', function(err, rows){
-		console.log(email);
-		result = { result:"success", msg:"Set Success" };
+		console.log(rows);
+		result = rows[0];
 		res.send(result);
 	});
 };

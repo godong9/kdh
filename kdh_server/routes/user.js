@@ -107,6 +107,97 @@ exports.login = function(req, res){
 };
 
 /*
+ * POST join_fb
+ * params : email, token, phone, school_idx 
+ */
+exports.join_fb = function(req, res){
+	var evt = new EventEmitter();
+	var dao_u = require('../sql/user_sql');
+	var result = {};
+
+	var email = req.body.email;
+	var token = req.body.token;
+	var phone = req.body.phone;
+	var school_idx = req.body.school_idx;
+	
+	console.log("params: "+email+"//"+token+"//"+phone+"//"+school_idx);
+
+	var params = { email: email }
+	dao_u.dao_check_email(evt, mysql_conn, params);
+
+	evt.on('check_email', function(err, rows){
+		if(err)
+		{
+			throw err;
+		}
+
+		if( rows[0].cnt === 0 )
+		{
+			var params = {
+						email: email,
+						token: token,
+						phone: phone,
+						school_idx: school_idx
+			};
+			dao_u.dao_join_fb(evt, mysql_conn, params);
+		}
+		else
+		{
+			result = { result:"fail", msg:"사용 중인 email입니다!" };
+			res.send(result);
+		}
+	});
+
+	evt.on('join_fb', function(err, rows){
+		console.log("Join Success");
+		register_session(req, email, phone, school_idx);
+
+		result = { result:"success", msg:"Join Success" };
+		res.send(result);
+	});
+};
+
+/*
+ * POST login_fb
+ * params : email, token
+ */
+exports.login_fb = function(req, res){
+	var evt = new EventEmitter();
+	var dao_u = require('../sql/user_sql');
+	var result = {};
+
+	var email = req.body.email;
+	var token = req.body.token;
+
+	var params = { 
+		email: email, 
+		token: token
+	}
+
+	dao_u.dao_login_fb(evt, mysql_conn, params);
+	evt.on('login_fb', function(err, rows){
+		if(err)
+		{
+			throw err;
+		}
+			
+		if( rows.length < 1 )
+		{
+			result = { result:"fail", msg:"email 또는 비밀번호가 잘못되었습니다!" };
+			res.send(result);
+		}
+		else 
+		{
+			register_session(req, rows[0].email, rows[0].phone, rows[0].school_idx);
+			console.log("Register Session -> "+req.session.email);
+
+			result = { result:"success", msg:"로그인 성공!" };
+			res.send(result);
+		}
+	});
+};
+
+/*
  * GET user_info
  * params : book_idx
  */
@@ -127,3 +218,26 @@ exports.get_user_info = function(req, res){
 		res.send(result);
 	});
 };
+
+/*
+ * GET my_page_list
+ * params : email
+ */
+exports.get_my_page_list = function(req, res){
+	var evt = new EventEmitter();
+	var dao_u = require('../sql/user_sql');
+	var result = {};
+
+	var email = req.session.email;
+
+	var params = { 
+		email: email
+	}
+
+	dao_u.dao_get_my_page_list(evt, mysql_conn, params);
+	evt.on('get_my_page_list', function(err, rows){
+		result = rows;
+		res.send(result);
+	});
+};
+
