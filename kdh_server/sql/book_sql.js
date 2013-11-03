@@ -68,3 +68,17 @@ exports.dao_set_book = function(evt, mysql_conn, params){
 		});
 	});
 }
+
+// dao_set_sell_book
+// params['book_idx']
+exports.dao_set_sell_book = function(evt, mysql_conn, params){
+	
+	var sql = "UPDATE `book` ";
+	sql += "SET `sell` = '1' "; 
+	sql += "WHERE `book_idx` = '"+params['book_idx']+"' ";
+
+	var query = mysql_conn.query(sql, params, function(err, rows, fields) {
+		console.log("Book Sell!");		
+		evt.emit('set_sell_book', err, rows);
+	});
+}

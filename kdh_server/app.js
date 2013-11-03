@@ -41,6 +41,7 @@ if ('development' == app.get('env')) {
 // GET request
 app.get('/get_book_list', book.get_book_list);
 app.get('/get_user_info', user.get_user_info);
+app.get('/set_sell_book', book.set_sell_book);
 app.get('/get_my_page_list', user.get_my_page_list);
 app.get('/img', function(req, res){	//이미지 파일 다운로드
 	var url_parts = url.parse(req.url, true); // url 파싱

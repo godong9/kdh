@@ -61,3 +61,26 @@ exports.set_book = function(req, res){
 		res.send(result);
 	});
 };
+
+/*
+ * POST set_sell_book
+ * params : book_idx
+ */
+exports.set_sell_book = function(req, res){
+	var evt = new EventEmitter();
+	var dao_b = require('../sql/book_sql');
+	var result = { };
+
+	var isbn = req.body.book_idx;
+
+	var params = { 
+		book_idx: book_idx
+	}
+
+	dao_b.dao_set_sell_book(evt, mysql_conn, params);
+	evt.on('set_sell_book', function(err, rows){
+		result = { result:"success", msg:"판매 완료!" };
+		res.send(result);
+	});
+};
+
